@@ -4,45 +4,87 @@ namespace EmailCountdown;
 
 use GifCreator\GifCreator;
 
-class DefaultCountdown
+abstract class AbstractCountdown
 {
-    /** @var int we create only 60 frames/seconds to create the fake counter */
+    /**
+     * @var int we create only 60 frames/seconds to create the fake counter
+     */
     protected $maxFrames = 60;
 
-    /** @var int currently fixed, if changed to dynamic size, don't forget to change the
-     * positioning below! */
+    /**
+     * @var int currently fixed, if changed to dynamic size, don't forget to change the positioning below!
+     */
     protected $width = 400;
 
-    /** @var int */
+    /**
+     * @var int
+     */
     protected $height = 100;
 
-    /** @var string */
+    /**
+     * @var string
+     */
     protected $fontFile = __DIR__ . '/../fonts/ARIAL.TTF';
 
-    /** @var int 100 ticks in gif -> 1 second in real time */
+    /**
+     * @var int 100 ticks in gif -> 1 second in real time
+     */
     protected $gifTicks = 100;
 
-    /** @var int */
+    /**
+     * @var int
+     */
     protected $gifLoops = 10;
 
-    /** @var \DateTime */
+    /**
+     * @var \DateTime
+     */
     protected $destinationTime = null;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     protected $backgroundColor = [
         'red'   => 255,
         'green' => 255,
         'blue'  => 255
     ];
 
-    /** @var array */
+    /**
+     * @var array
+     */
     protected $textColor = [
         'red'   => 80,
         'green' => 80,
         'blue'  => 80
     ];
 
+    /**
+     * @var array
+     */
+    protected $formBackgroundColor = [
+        'red'   => 255,
+        'green' => 204,
+        'blue'  => 204
+    ];
 
+    /**
+     * @var array
+     */
+    protected $formForegroundColor = [
+        'red'   => 255,
+        'green' => 0,
+        'blue'  => 0
+    ];
+
+    /**
+     * @var resource
+     */
+    protected $formImage = null;
+
+    /**
+     * @var array
+     */
     protected $textData = [
         'days'    => [
             'textSize'       => 32,
@@ -82,7 +124,9 @@ class DefaultCountdown
         ]
     ];
 
-    /** @var bool */
+    /**
+     * @var bool
+     */
     protected $showTextLabel = true;
 
     /**
@@ -92,6 +136,35 @@ class DefaultCountdown
     public function __construct($destinationTime = null)
     {
         $this->setDestinationTime($destinationTime);
+    }
+
+    protected abstract function getFormImage($days, $hours, $minutes, $seconds);
+    protected abstract function modifyFrame($frame, $days, $hours, $minutes, $seconds);
+
+    /**
+     * @param string $formBackgroundColor
+     * @return $this
+     */
+    public function setFormBackgroundColor($formBackgroundColor)
+    {
+        if (!empty($formBackgroundColor) && preg_match('/[0-9a-fA-F]{6}/', $formBackgroundColor) == 1) {
+            $this->formBackgroundColor = self::convertHexToRGB($formBackgroundColor);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string $formForegroundColor
+     * @return $this
+     */
+    public function setFormForegroundColor($formForegroundColor)
+    {
+        if (!empty($formForegroundColor) && preg_match('/[0-9a-fA-F]{6}/', $formForegroundColor) == 1) {
+            $this->formForegroundColor = self::convertHexToRGB($formForegroundColor);
+        }
+
+        return $this;
     }
 
     /**
@@ -130,10 +203,11 @@ class DefaultCountdown
     }
 
     /**
-     * set the destination time for the fake countdown
+     * Set the destination time for the fake countdown
      *
      * @param \DateTime $destinationTime
      * @return $this
+     * @throws \Exception
      */
     public function setDestinationTime($destinationTime)
     {
@@ -152,7 +226,7 @@ class DefaultCountdown
     }
 
     /**
-     * set the color for the text labels
+     * Set the color for the text labels
      *
      * @param string $textColor must be in hex code i.e. 00ff00
      * @return $this
@@ -166,7 +240,7 @@ class DefaultCountdown
     }
 
     /**
-     * set the background color
+     * Set the background color
      *
      * @param string $backgroundColor must be in hex code i.e. ff0000
      * @return $this
@@ -180,12 +254,12 @@ class DefaultCountdown
     }
 
     /**
-     * convert hex color code to array
+     * Convert hex color code to array
      *
      * @param string $color
      * @return array
      */
-    static function convertHexToRGB($color)
+    protected static function convertHexToRGB($color)
     {
         $int = hexdec($color);
         return [
@@ -196,7 +270,7 @@ class DefaultCountdown
     }
 
     /**
-     * create a new gif frame image with gd-library
+     * Create a new gif frame image with gd-library
      *
      * @return resource
      */
@@ -214,7 +288,7 @@ class DefaultCountdown
     }
 
     /**
-     * adding texts for each frame
+     * Adding texts for each frame
      *
      * @param resource $frame
      * @param int $days
@@ -283,7 +357,7 @@ class DefaultCountdown
     }
 
     /**
-     * build a new frame (one image in the countdown)
+     * Build a new frame (one image in the countdown)
      *
      * @param int $days
      * @param int $hours
@@ -293,11 +367,13 @@ class DefaultCountdown
      */
     protected function buildFrame($days, $hours, $minutes, $seconds)
     {
-        return $this->addText($this->createFrame(), $days, $hours, $minutes, $seconds);
+        $mainFrame = $this->createFrame();
+        $modifyFrame = $this->modifyFrame($mainFrame, $days, $hours, $minutes, $seconds);
+        return $this->addText($modifyFrame, $days, $hours, $minutes, $seconds);
     }
 
     /**
-     * get the fake countdown as gif
+     * Get the fake countdown as gif
      *
      * @return string
      * @throws \Exception
@@ -340,7 +416,7 @@ class DefaultCountdown
     }
 
     /**
-     * use a different true type font file
+     * Use a different true type font file
      *
      * @param string $fontFile
      * @return $this
@@ -354,7 +430,7 @@ class DefaultCountdown
     }
 
     /**
-     * hide/show text labels
+     * Hide/show text labels
      *
      * @param bool $showTextLabel
      * @return $this
@@ -366,7 +442,7 @@ class DefaultCountdown
     }
 
     /**
-     * set max frames
+     * Set max frames
      *
      * @param int $maxFrames
      * @return $this
