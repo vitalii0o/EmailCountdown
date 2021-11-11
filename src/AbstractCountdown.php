@@ -2,10 +2,13 @@
 
 namespace EmailCountdown;
 
-use GifCreator\GifCreator;
-
 abstract class AbstractCountdown
 {
+    /**
+     * @var int
+     */
+    protected $scale = 1;
+
     /**
      * @var int we create only 60 frames/seconds to create the fake counter
      */
@@ -87,12 +90,12 @@ abstract class AbstractCountdown
      */
     protected $textData = [
         'days'    => [
-            'textSize'       => 32,
+            'textSize'       => 30,
             'textPositionX'  => 50,
             'textPositionY'  => 62,
             'label'          => 'TAGE',
             'labelSize'      => 7,
-            'labelPositionX' => 52,
+            'labelPositionX' => 50,
             'labelPositionY' => 75
         ],
         'hours'   => [
@@ -125,12 +128,20 @@ abstract class AbstractCountdown
     ];
 
     /**
+     * @var array
+     */
+    protected $textLabelColor = [
+        'red'   => 60,
+        'green' => 60,
+        'blue'  => 60
+    ];
+
+    /**
      * @var bool
      */
     protected $showTextLabel = true;
 
     /**
-     * DefaultCountdown constructor.
      * @param \DateTime $destinationTime
      */
     public function __construct($destinationTime = null)
@@ -277,12 +288,16 @@ abstract class AbstractCountdown
     protected function createFrame()
     {
         // create frame
-        $frame = imagecreatetruecolor($this->width, $this->height);
+        $frame = imagecreatetruecolor($this->width * $this->scale, $this->height * $this->scale);
 
         // background color again
-        $background_color = imagecolorallocate($frame, $this->backgroundColor['red'],
-            $this->backgroundColor['green'], $this->backgroundColor['blue']);
-        imagefilledrectangle($frame, 0, 0, $this->width, $this->height, $background_color);
+        $backgroundColor = imagecolorallocate($frame, $this->backgroundColor['red'], $this->backgroundColor['green'], $this->backgroundColor['blue']);
+        imagefilledrectangle(
+            $frame,
+            0, 0,
+            $this->width * $this->scale, $this->height * $this->scale,
+            $backgroundColor
+        );
 
         return $frame;
     }
@@ -299,58 +314,109 @@ abstract class AbstractCountdown
      */
     protected function addText($frame, $days, $hours, $minutes, $seconds)
     {
-        $text_color = imagecolorallocate($frame, $this->textColor['red'], $this->textColor['green'],
-            $this->textColor['blue']);
+        $textColor = imagecolorallocate($frame, $this->textColor['red'], $this->textColor['green'], $this->textColor['blue']);
 
-        // calculate center of bounding box, so text is centered
-        $daysBBox = imagettfbbox($this->textData['days']['textSize'], 0, $this->fontFile, sprintf('%02d', $days));
-        $daysPositionX = $this->textData['days']['textPositionX'] - ($daysBBox [4] / 2);
+        // Calculate center of bounding box, so text is centered
+        $daysBBox = imagettfbbox($this->textData['days']['textSize'] * $this->scale,0, $this->fontFile, sprintf('%02d', $days));
+        $daysPositionX = ($this->textData['days']['textPositionX'] * $this->scale) - ($daysBBox[4] / 2);
 
-        $hoursBBox = imagettfbbox($this->textData['hours']['textSize'], 0, $this->fontFile, sprintf('%02d', $hours));
-        $hoursPositionX = $this->textData['hours']['textPositionX'] - ($hoursBBox [4] / 2);
+        $hoursBBox = imagettfbbox($this->textData['hours']['textSize'] * $this->scale, 0, $this->fontFile, sprintf('%02d', $hours));
+        $hoursPositionX = ($this->textData['hours']['textPositionX'] * $this->scale) - ($hoursBBox[4] / 2);
 
-        $minutesBBox = imagettfbbox($this->textData['minutes']['textSize'], 0, $this->fontFile, sprintf('%02d', $minutes));
-        $minutesPositionX = $this->textData['minutes']['textPositionX'] - ($minutesBBox [4] / 2);
+        $minutesBBox = imagettfbbox($this->textData['minutes']['textSize'] * $this->scale, 0, $this->fontFile, sprintf('%02d', $minutes));
+        $minutesPositionX = ($this->textData['minutes']['textPositionX'] * $this->scale) - ($minutesBBox[4] / 2);
 
-        $secondsBBox = imagettfbbox($this->textData['seconds']['textSize'], 0, $this->fontFile, sprintf('%02d', $seconds));
-        $secondsPositionX = $this->textData['seconds']['textPositionX'] - ($secondsBBox [4] / 2);
+        $secondsBBox = imagettfbbox($this->textData['seconds']['textSize'] * $this->scale, 0, $this->fontFile, sprintf('%02d', $seconds));
+        $secondsPositionX = ($this->textData['seconds']['textPositionX'] * $this->scale) - ($secondsBBox[4] / 2);
 
-        imagettftext($frame, $this->textData['days']['textSize'], 0, $daysPositionX,
-            $this->textData['days']['textPositionY'], $text_color, $this->fontFile,
-            sprintf('%02d', $days));
-        imagettftext($frame, $this->textData['hours']['textSize'], 0, $hoursPositionX,
-            $this->textData['hours']['textPositionY'], $text_color, $this->fontFile, sprintf('%02d', $hours));
-        imagettftext($frame, $this->textData['minutes']['textSize'], 0, $minutesPositionX,
-            $this->textData['minutes']['textPositionY'], $text_color, $this->fontFile, sprintf('%02d', $minutes));
-        imagettftext($frame, $this->textData['seconds']['textSize'], 0, $secondsPositionX,
-            $this->textData['seconds']['textPositionY'], $text_color, $this->fontFile, sprintf('%02d', $seconds));
+        imagettftext(
+            $frame,
+            $this->textData['days']['textSize'] * $this->scale,
+            0,
+            $daysPositionX, $this->textData['days']['textPositionY'] * $this->scale,
+            $textColor,
+            $this->fontFile,
+            sprintf('%02d', $days)
+        );
+        imagettftext(
+            $frame,
+            $this->textData['hours']['textSize'] * $this->scale,
+            0,
+            $hoursPositionX, $this->textData['hours']['textPositionY'] * $this->scale,
+            $textColor,
+            $this->fontFile,
+            sprintf('%02d', $hours)
+        );
+        imagettftext(
+            $frame,
+            $this->textData['minutes']['textSize'] * $this->scale,
+            0,
+            $minutesPositionX, $this->textData['minutes']['textPositionY'] * $this->scale,
+            $textColor,
+            $this->fontFile,
+            sprintf('%02d', $minutes)
+        );
+        imagettftext(
+            $frame,
+            $this->textData['seconds']['textSize'] * $this->scale,
+            0,
+            $secondsPositionX, $this->textData['seconds']['textPositionY'] * $this->scale,
+            $textColor,
+            $this->fontFile,
+            sprintf('%02d', $seconds)
+        );
 
         if ($this->showTextLabel) {
+            $textLabelColor = imagecolorallocate($frame, $this->textLabelColor['red'], $this->textLabelColor['green'], $this->textLabelColor['blue']);
 
-            $daysLabelBBox = imagettfbbox($this->textData['days']['labelSize'], 0, $this->fontFile, $this->textData['days']['label']);
-            $daysLabelPositionX = $this->textData['days']['labelPositionX'] - ($daysLabelBBox [4] / 2);
+            $daysLabelBBox = imagettfbbox($this->textData['days']['labelSize'] * $this->scale, 0, $this->fontFile, $this->textData['days']['label']);
+            $daysLabelPositionX = $this->textData['days']['labelPositionX'] * $this->scale - ($daysLabelBBox[4] / 2);
 
-            $hoursLabelBBox = imagettfbbox($this->textData['hours']['labelSize'], 0, $this->fontFile, $this->textData['hours']['label']);
-            $hoursLabelPositionX = $this->textData['hours']['labelPositionX'] - ($hoursLabelBBox [4] / 2);
+            $hoursLabelBBox = imagettfbbox($this->textData['hours']['labelSize'] * $this->scale, 0, $this->fontFile, $this->textData['hours']['label']);
+            $hoursLabelPositionX = $this->textData['hours']['labelPositionX'] * $this->scale - ($hoursLabelBBox[4] / 2);
 
-            $minutesLabelBBox = imagettfbbox($this->textData['minutes']['labelSize'], 0, $this->fontFile, $this->textData['minutes']['label']);
-            $minutesLabelPositionX = $this->textData['minutes']['labelPositionX'] - ($minutesLabelBBox [4] / 2);
+            $minutesLabelBBox = imagettfbbox($this->textData['minutes']['labelSize'] * $this->scale, 0, $this->fontFile, $this->textData['minutes']['label']);
+            $minutesLabelPositionX = $this->textData['minutes']['labelPositionX'] * $this->scale - ($minutesLabelBBox[4] / 2);
 
-            $secondsLabelBBox = imagettfbbox($this->textData['seconds']['labelSize'], 0, $this->fontFile, $this->textData['seconds']['label']);
-            $secondsLabelPositionX = $this->textData['seconds']['labelPositionX'] - ($secondsLabelBBox [4] / 2);
+            $secondsLabelBBox = imagettfbbox($this->textData['seconds']['labelSize'] * $this->scale, 0, $this->fontFile, $this->textData['seconds']['label']);
+            $secondsLabelPositionX = $this->textData['seconds']['labelPositionX'] * $this->scale - ($secondsLabelBBox[4] / 2);
 
-            imagettftext($frame, $this->textData['days']['labelSize'], 0, $daysLabelPositionX,
-                $this->textData['days']['labelPositionY'], $text_color,
-                $this->fontFile, $this->textData['days']['label']);
-            imagettftext($frame, $this->textData['hours']['labelSize'], 0,$hoursLabelPositionX,
-                $this->textData['hours']['labelPositionY'],
-                $text_color, $this->fontFile, $this->textData['hours']['label']);
-            imagettftext($frame, $this->textData['minutes']['labelSize'], 0,
-                $minutesLabelPositionX, $this->textData['minutes']['labelPositionY'],
-                $text_color, $this->fontFile, $this->textData['minutes']['label']);
-            imagettftext($frame, $this->textData['seconds']['labelSize'], 0,
-                $secondsLabelPositionX, $this->textData['seconds']['labelPositionY'],
-                $text_color, $this->fontFile, $this->textData['seconds']['label']);
+            imagettftext(
+                $frame,
+                $this->textData['days']['labelSize'] * $this->scale,
+                0,
+                $daysLabelPositionX, $this->textData['days']['labelPositionY'] * $this->scale,
+                $textLabelColor,
+                $this->fontFile,
+                $this->textData['days']['label']
+            );
+            imagettftext(
+                $frame,
+                $this->textData['hours']['labelSize'] * $this->scale,
+                0,
+                $hoursLabelPositionX, $this->textData['hours']['labelPositionY'] * $this->scale,
+                $textLabelColor,
+                $this->fontFile,
+                $this->textData['hours']['label']
+            );
+            imagettftext(
+                $frame,
+                $this->textData['minutes']['labelSize'] * $this->scale,
+                0,
+                $minutesLabelPositionX, $this->textData['minutes']['labelPositionY'] * $this->scale,
+                $textLabelColor,
+                $this->fontFile,
+                $this->textData['minutes']['label']
+            );
+            imagettftext(
+                $frame,
+                $this->textData['seconds']['labelSize'] * $this->scale,
+                0,
+                $secondsLabelPositionX, $this->textData['seconds']['labelPositionY'] * $this->scale,
+                $textLabelColor,
+                $this->fontFile,
+                $this->textData['seconds']['label']
+            );
         }
 
         return $frame;
@@ -438,6 +504,7 @@ abstract class AbstractCountdown
     public function setShowTextLabel(bool $showTextLabel)
     {
         $this->showTextLabel = $showTextLabel;
+
         return $this;
     }
 
@@ -450,6 +517,30 @@ abstract class AbstractCountdown
     public function setMaxFrames(int $maxFrames)
     {
         $this->maxFrames = $maxFrames;
+        return $this;
+    }
+
+    /**
+     * @param float $scale
+     * @return $this
+     */
+    public function setScale(float $scale)
+    {
+        $this->scale = $scale;
+        return $this;
+    }
+
+
+    /**
+     * @param string $textLabelColor
+     * @return $this
+     */
+    public function setTextLabelColor($textLabelColor)
+    {
+        if (!empty($textLabelColor) && preg_match('/[0-9a-fA-F]{6}/', $textLabelColor) == 1) {
+            $this->textLabelColor = self::convertHexToRGB($textLabelColor);
+        }
+
         return $this;
     }
 }

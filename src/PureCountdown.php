@@ -2,8 +2,6 @@
 
 namespace EmailCountdown;
 
-use GifCreator\GifCreator;
-
 class PureCountdown extends AbstractCountdown
 {
     /**

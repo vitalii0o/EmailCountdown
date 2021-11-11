@@ -2,8 +2,6 @@
 
 namespace EmailCountdown;
 
-use GifCreator\GifCreator;
-
 class BoardRoundedCountdown extends AbstractCountdown
 {
     /**
@@ -17,9 +15,9 @@ class BoardRoundedCountdown extends AbstractCountdown
     private $squareHeight = 46;
 
     /**
-     * @var float
+     * @var int
      */
-    private $squareScale = 3.0;
+    private $radiusCorner = 5;
 
     /**
      * @var array
@@ -37,7 +35,7 @@ class BoardRoundedCountdown extends AbstractCountdown
     protected $textData = [
         'days'    => [
             'textSize'       => 32,
-            'textPositionX'  => 75,
+            'textPositionX'  => 77,
             'textPositionY'  => 64,
             'label'          => 'TAGE',
             'labelSize'      => 7,
@@ -46,40 +44,31 @@ class BoardRoundedCountdown extends AbstractCountdown
         ],
         'hours'   => [
             'textSize'       => 30,
-            'textPositionX'  => 157,
+            'textPositionX'  => 158,
             'textPositionY'  => 64,
             'label'          => 'STUNDEN',
             'labelSize'      => 7,
-            'labelPositionX' => 162,
+            'labelPositionX' => 164,
             'labelPositionY' => 85
         ],
         'minutes' => [
             'textSize'       => 30,
-            'textPositionX'  => 237,
+            'textPositionX'  => 238,
             'textPositionY'  => 64,
             'label'          => 'MINUTEN',
             'labelSize'      => 7,
-            'labelPositionX' => 242,
+            'labelPositionX' => 244,
             'labelPositionY' => 85
         ],
         'seconds' => [
             'textSize'       => 30,
-            'textPositionX'  => 317,
+            'textPositionX'  => 320,
             'textPositionY'  => 64,
             'label'          => 'SEKUNDEN',
             'labelSize'      => 7,
-            'labelPositionX' => 322,
+            'labelPositionX' => 325,
             'labelPositionY' => 85
         ]
-    ];
-
-    /**
-     * @var array
-     */
-    protected $textLabelColor = [
-        'red'   => 60,
-        'green' => 60,
-        'blue'  => 60
     ];
 
     /**
@@ -118,19 +107,6 @@ class BoardRoundedCountdown extends AbstractCountdown
     }
 
     /**
-     * @param string $textLabelColor
-     * @return $this
-     */
-    public function setTextLabelColor($textLabelColor)
-    {
-        if (!empty($textLabelColor) && preg_match('/[0-9a-fA-F]{6}/', $textLabelColor) == 1) {
-            $this->textLabelColor = self::convertHexToRGB($textLabelColor);
-        }
-
-        return $this;
-    }
-
-    /**
      * Adding texts for each frame
      *
      * @param resource $frame
@@ -144,72 +120,115 @@ class BoardRoundedCountdown extends AbstractCountdown
     {
         $textColor = imagecolorallocate($frame, $this->textColor['red'], $this->textColor['green'], $this->textColor['blue']);
 
-        // calculate center of bounding box, so text is centered
-        $daysBBox = imagettfbbox($this->textData['days']['textSize'], 0, $this->fontFile, sprintf('%02d', $days));
-        $daysPositionX = $this->textData['days']['textPositionX'] - ($daysBBox [4] / 2);
+        // Calculate center of bounding box, so text is centered
+        $daysBBox = imagettfbbox($this->textData['days']['textSize'] * $this->scale,0, $this->fontFile, sprintf('%02d', $days));
+        $daysPositionX = ($this->textData['days']['textPositionX'] * $this->scale) - ($daysBBox[4] / 2);
 
-        $hoursBBox = imagettfbbox($this->textData['hours']['textSize'], 0, $this->fontFile, sprintf('%02d', $hours));
-        $hoursPositionX = $this->textData['hours']['textPositionX'] - ($hoursBBox [4] / 2);
+        $hoursBBox = imagettfbbox($this->textData['hours']['textSize'] * $this->scale, 0, $this->fontFile, sprintf('%02d', $hours));
+        $hoursPositionX = ($this->textData['hours']['textPositionX'] * $this->scale) - ($hoursBBox[4] / 2);
 
-        $minutesBBox = imagettfbbox($this->textData['minutes']['textSize'], 0, $this->fontFile, sprintf('%02d', $minutes));
-        $minutesPositionX = $this->textData['minutes']['textPositionX'] - ($minutesBBox [4] / 2);
+        $minutesBBox = imagettfbbox($this->textData['minutes']['textSize'] * $this->scale, 0, $this->fontFile, sprintf('%02d', $minutes));
+        $minutesPositionX = ($this->textData['minutes']['textPositionX'] * $this->scale) - ($minutesBBox[4] / 2);
 
-        $secondsBBox = imagettfbbox($this->textData['seconds']['textSize'], 0, $this->fontFile, sprintf('%02d', $seconds));
-        $secondsPositionX = $this->textData['seconds']['textPositionX'] - ($secondsBBox [4] / 2);
+        $secondsBBox = imagettfbbox($this->textData['seconds']['textSize'] * $this->scale, 0, $this->fontFile, sprintf('%02d', $seconds));
+        $secondsPositionX = ($this->textData['seconds']['textPositionX'] * $this->scale) - ($secondsBBox[4] / 2);
 
         $days = sprintf('%02d', $days);
         $formatted = implode(' ', str_split($days));
-        imagettftext($frame, $this->textData['days']['textSize'], 0, $daysPositionX,
-            $this->textData['days']['textPositionY'], $textColor, $this->fontFile,
+        imagettftext(
+            $frame,
+            $this->textData['days']['textSize'] * $this->scale,
+            0,
+            $daysPositionX, $this->textData['days']['textPositionY'] * $this->scale,
+            $textColor,
+            $this->fontFile,
             $formatted
         );
         $hours = sprintf('%02d', $hours);
         $formatted = implode(' ', str_split($hours));
-        imagettftext($frame, $this->textData['hours']['textSize'], 0, $hoursPositionX,
-            $this->textData['hours']['textPositionY'], $textColor, $this->fontFile,
+        imagettftext(
+            $frame,
+            $this->textData['hours']['textSize'] * $this->scale,
+            0,
+            $hoursPositionX, $this->textData['hours']['textPositionY'] * $this->scale,
+            $textColor,
+            $this->fontFile,
             $formatted
         );
         $minutes = sprintf('%02d', $minutes);
         $formatted = implode(' ', str_split($minutes));
-        imagettftext($frame, $this->textData['minutes']['textSize'], 0, $minutesPositionX,
-            $this->textData['minutes']['textPositionY'], $textColor, $this->fontFile,
+        imagettftext(
+            $frame,
+            $this->textData['minutes']['textSize'] * $this->scale,
+            0,
+            $minutesPositionX, $this->textData['minutes']['textPositionY'] * $this->scale,
+            $textColor,
+            $this->fontFile,
             $formatted
         );
         $seconds = sprintf('%02d', $seconds);
         $formatted = implode(' ', str_split($seconds));
-        imagettftext($frame, $this->textData['seconds']['textSize'], 0, $secondsPositionX,
-            $this->textData['seconds']['textPositionY'], $textColor, $this->fontFile,
+        imagettftext(
+            $frame,
+            $this->textData['seconds']['textSize'] * $this->scale,
+            0,
+            $secondsPositionX, $this->textData['seconds']['textPositionY'] * $this->scale,
+            $textColor,
+            $this->fontFile,
             $formatted
         );
 
         if ($this->showTextLabel) {
-
             $textLabelColor = imagecolorallocate($frame, $this->textLabelColor['red'], $this->textLabelColor['green'], $this->textLabelColor['blue']);
 
-            $daysLabelBBox = imagettfbbox($this->textData['days']['labelSize'], 0, $this->fontFile, $this->textData['days']['label']);
-            $daysLabelPositionX = $this->textData['days']['labelPositionX'] - ($daysLabelBBox [4] / 2);
+            $daysLabelBBox = imagettfbbox($this->textData['days']['labelSize'] * $this->scale, 0, $this->fontFile, $this->textData['days']['label']);
+            $daysLabelPositionX = $this->textData['days']['labelPositionX'] * $this->scale - ($daysLabelBBox[4] / 2);
 
-            $hoursLabelBBox = imagettfbbox($this->textData['hours']['labelSize'], 0, $this->fontFile, $this->textData['hours']['label']);
-            $hoursLabelPositionX = $this->textData['hours']['labelPositionX'] - ($hoursLabelBBox [4] / 2);
+            $hoursLabelBBox = imagettfbbox($this->textData['hours']['labelSize'] * $this->scale, 0, $this->fontFile, $this->textData['hours']['label']);
+            $hoursLabelPositionX = $this->textData['hours']['labelPositionX'] * $this->scale - ($hoursLabelBBox[4] / 2);
 
-            $minutesLabelBBox = imagettfbbox($this->textData['minutes']['labelSize'], 0, $this->fontFile, $this->textData['minutes']['label']);
-            $minutesLabelPositionX = $this->textData['minutes']['labelPositionX'] - ($minutesLabelBBox [4] / 2);
+            $minutesLabelBBox = imagettfbbox($this->textData['minutes']['labelSize'] * $this->scale, 0, $this->fontFile, $this->textData['minutes']['label']);
+            $minutesLabelPositionX = $this->textData['minutes']['labelPositionX'] * $this->scale - ($minutesLabelBBox[4] / 2);
 
-            $secondsLabelBBox = imagettfbbox($this->textData['seconds']['labelSize'], 0, $this->fontFile, $this->textData['seconds']['label']);
-            $secondsLabelPositionX = $this->textData['seconds']['labelPositionX'] - ($secondsLabelBBox [4] / 2);
+            $secondsLabelBBox = imagettfbbox($this->textData['seconds']['labelSize'] * $this->scale, 0, $this->fontFile, $this->textData['seconds']['label']);
+            $secondsLabelPositionX = $this->textData['seconds']['labelPositionX'] * $this->scale - ($secondsLabelBBox[4] / 2);
 
-            imagettftext($frame, $this->textData['days']['labelSize'], 0, $daysLabelPositionX,
-                $this->textData['days']['labelPositionY'], $textLabelColor,
-                $this->fontFile, $this->textData['days']['label']);
-            imagettftext($frame, $this->textData['hours']['labelSize'], 0, $hoursLabelPositionX,
-                $this->textData['hours']['labelPositionY'],
-                $textLabelColor, $this->fontFile, $this->textData['hours']['label']);
-            imagettftext($frame, $this->textData['minutes']['labelSize'], 0,
-                $minutesLabelPositionX, $this->textData['minutes']['labelPositionY'],
-                $textLabelColor, $this->fontFile, $this->textData['minutes']['label']);
-            imagettftext($frame, $this->textData['seconds']['labelSize'], 0,
-                $secondsLabelPositionX, $this->textData['seconds']['labelPositionY'],
-                $textLabelColor, $this->fontFile, $this->textData['seconds']['label']);
+            imagettftext(
+                $frame,
+                $this->textData['days']['labelSize'] * $this->scale,
+                0,
+                $daysLabelPositionX, $this->textData['days']['labelPositionY'] * $this->scale,
+                $textLabelColor,
+                $this->fontFile,
+                $this->textData['days']['label']
+            );
+            imagettftext(
+                $frame,
+                $this->textData['hours']['labelSize'] * $this->scale,
+                0,
+                $hoursLabelPositionX, $this->textData['hours']['labelPositionY'] * $this->scale,
+                $textLabelColor,
+                $this->fontFile,
+                $this->textData['hours']['label']
+            );
+            imagettftext(
+                $frame,
+                $this->textData['minutes']['labelSize'] * $this->scale,
+                0,
+                $minutesLabelPositionX, $this->textData['minutes']['labelPositionY'] * $this->scale,
+                $textLabelColor,
+                $this->fontFile,
+                $this->textData['minutes']['label']
+            );
+            imagettftext(
+                $frame,
+                $this->textData['seconds']['labelSize'] * $this->scale,
+                0,
+                $secondsLabelPositionX, $this->textData['seconds']['labelPositionY'] * $this->scale,
+                $textLabelColor,
+                $this->fontFile,
+                $this->textData['seconds']['label']
+            );
         }
 
         return $frame;
@@ -224,12 +243,12 @@ class BoardRoundedCountdown extends AbstractCountdown
      */
     protected function getFormImage($days, $hours, $minutes, $seconds)
     {
-        $squareImageWidth = $this->width * $this->squareScale;
-        $squareImageHeight = $this->height * $this->squareScale;
+        $formImageWidth = $this->width * $this->scale;
+        $formImageHeight = $this->height * $this->scale;
         if (empty($this->formImage)) {
 
             // create the square image once
-            $this->formImage = imagecreatetruecolor($squareImageWidth, $squareImageHeight);
+            $this->formImage = imagecreatetruecolor($formImageWidth, $formImageHeight);
 
             // background
             $backgroundColor = imagecolorallocate(
@@ -241,10 +260,9 @@ class BoardRoundedCountdown extends AbstractCountdown
             imagefilledrectangle(
                 $this->formImage,
                 0, 0,
-                $squareImageWidth, $squareImageHeight,
+                $formImageWidth, $formImageHeight,
                 $backgroundColor
             );
-            imagesetthickness($this->formImage, $this->squareScale * 2);
 
             $this->formBackgroundColorAll = imagecolorallocate(
                 $this->formImage,
@@ -268,21 +286,21 @@ class BoardRoundedCountdown extends AbstractCountdown
         );
         imagesetthickness($this->formImage, $this->lineThickness);
 
-        $zoomWidth = $this->squareWidth * $this->squareScale;
-        $zoomHeight = $this->squareHeight * $this->squareScale;
+        $zoomWidth = $this->squareWidth * $this->scale;
+        $zoomHeight = $this->squareHeight * $this->scale;
 
-        $paddingLeft = 78;
-        $paddingBetweenNumbers = 10;
-        $paddingBetweenItems = 40;
-        $radiusCorner = 20;
+        $paddingLeft = 45 * $this->scale;
+        $paddingBetweenNumbers = 2 * $this->scale;
+        $paddingBetweenItems = 15 * $this->scale;
+        $radiusCorner = $this->radiusCorner * $this->scale;
 
-        $y1 = ($squareImageHeight - $zoomHeight) / 2;
+        $y1 = ($formImageHeight - $zoomHeight) / 2;
         $y2 = $y1 + $zoomHeight;
-        $xRepeater = $squareImageWidth / 10;
+        $xRepeater = $formImageWidth / 10;
         $x1 = (($xRepeater - $zoomWidth) / 2) + $paddingLeft;
-        $yLine = $squareImageHeight / 2 - 2;
+        $yLine = $formImageHeight / 2 - 2 * $this->scale;
 
-        $xPointer = $x1 + 50;
+        $xPointer = $x1;// + 50;
 
         // Days
         $this->imageRectangleWithRoundedCorners(
@@ -422,8 +440,8 @@ class BoardRoundedCountdown extends AbstractCountdown
             $frame, $squareImage,
             0, 0,
             0, 0,
-            $this->width, $this->height,
-            $this->width * $this->squareScale, $this->height * $this->squareScale
+            $this->width * $this->scale, $this->height * $this->scale,
+            $this->width * $this->scale, $this->height * $this->scale
         );
 
         return $frame;
@@ -432,12 +450,12 @@ class BoardRoundedCountdown extends AbstractCountdown
     protected function imageRectangleWithRoundedCorners(&$im, $x1, $y1, $x2, $y2, $radius, $color)
     {
 // draw rectangle without corners
-        imagefilledrectangle($im, $x1+$radius, $y1, $x2-$radius, $y2, $color);
-        imagefilledrectangle($im, $x1, $y1+$radius, $x2, $y2-$radius, $color);
+        imagefilledrectangle($im, $x1 + $radius, $y1, $x2 - $radius, $y2, $color);
+        imagefilledrectangle($im, $x1, $y1 + $radius, $x2, $y2 - $radius, $color);
 // draw circled corners
-        imagefilledellipse($im, $x1+$radius, $y1+$radius, $radius*2, $radius*2, $color);
-        imagefilledellipse($im, $x2-$radius, $y1+$radius, $radius*2, $radius*2, $color);
-        imagefilledellipse($im, $x1+$radius, $y2-$radius, $radius*2, $radius*2, $color);
-        imagefilledellipse($im, $x2-$radius, $y2-$radius, $radius*2, $radius*2, $color);
+        imagefilledellipse($im, $x1 + $radius, $y1 + $radius, $radius * 2, $radius * 2, $color);
+        imagefilledellipse($im, $x2 - $radius, $y1 + $radius, $radius * 2, $radius * 2, $color);
+        imagefilledellipse($im, $x1 + $radius, $y2 - $radius, $radius * 2, $radius * 2, $color);
+        imagefilledellipse($im, $x2 - $radius, $y2 - $radius, $radius * 2, $radius * 2, $color);
     }
 }

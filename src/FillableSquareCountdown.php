@@ -20,11 +20,6 @@ class FillableSquareCountdown extends AbstractCountdown
     private $circleRadius = 60;
 
     /**
-     * @var float
-     */
-    private $squareScale = 3.0;
-
-    /**
      * @var array
      */
     private $squareBackgroundColorAll = null;
@@ -43,12 +38,12 @@ class FillableSquareCountdown extends AbstractCountdown
      */
     protected function getFormImage($days, $hours, $minutes, $seconds)
     {
-        $squareImageWidth = $this->width * $this->squareScale;
-        $squareImageHeight = $this->height * $this->squareScale;
+        $formImageWidth = $this->width * $this->scale;
+        $formImageHeight = $this->height * $this->scale;
         if (empty($this->formImage)) {
 
             // create the square image once
-            $this->formImage = imagecreatetruecolor($squareImageWidth, $squareImageHeight);
+            $this->formImage = imagecreatetruecolor($formImageWidth, $formImageHeight);
 
             // background
             $backgroundColor = imagecolorallocate(
@@ -60,10 +55,9 @@ class FillableSquareCountdown extends AbstractCountdown
             imagefilledrectangle(
                 $this->formImage,
                 0, 0,
-                $squareImageWidth, $squareImageHeight,
+                $formImageWidth, $formImageHeight,
                 $backgroundColor
             );
-            imagesetthickness($this->formImage, $this->squareScale * 2);
 
             $this->squareBackgroundColorAll = imagecolorallocate(
                 $this->formImage,
@@ -79,29 +73,29 @@ class FillableSquareCountdown extends AbstractCountdown
             );
         }
 
-        $zoomWidth = $this->squareWidth * $this->squareScale;
-        $zoomHeight = $this->squareHeight * $this->squareScale;
-        $circleRadius = $this->circleRadius * $this->squareScale;
+        $zoomWidth = $this->squareWidth * $this->scale;
+        $zoomHeight = $this->squareHeight * $this->scale;
+        $circleRadius = $this->circleRadius * $this->scale;
 
-        $y1 = ($squareImageHeight - $zoomHeight) / 2;
+        $y1 = ($formImageHeight - $zoomHeight) / 2;
         $y2 = $y1 + $zoomHeight;
-        $margin = 5 * $this->squareScale;
+        $margin = 5 * $this->scale;
 
         imagefilledellipse(
             $this->formImage,
-            $zoomWidth / 2 - $margin, $squareImageHeight / 2,
+            $zoomWidth / 2 - $margin, $formImageHeight / 2,
             $circleRadius, $circleRadius,
             $this->squareForegroundColorAll
         );
         imagefilledrectangle(
             $this->formImage,
             $zoomWidth / 2 - $margin, $y1,
-            $squareImageWidth - $zoomWidth / 2 + $margin, $y2,
+            $formImageWidth - $zoomWidth / 2 + $margin, $y2,
             $this->squareForegroundColorAll
         );
         imagefilledellipse(
             $this->formImage,
-            $squareImageWidth - $zoomWidth / 2 + $margin, $squareImageHeight / 2,
+            $formImageWidth - $zoomWidth / 2 + $margin, $formImageHeight / 2,
             $circleRadius, $circleRadius,
             $this->squareForegroundColorAll
         );
@@ -124,8 +118,8 @@ class FillableSquareCountdown extends AbstractCountdown
             $frame, $squareImage,
             0, 0,
             0, 0,
-            $this->width, $this->height,
-            $this->width * $this->squareScale, $this->height * $this->squareScale
+            $this->width * $this->scale, $this->height * $this->scale,
+            $this->width * $this->scale, $this->height * $this->scale
         );
 
         return $frame;

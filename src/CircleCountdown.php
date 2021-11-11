@@ -7,17 +7,7 @@ class CircleCountdown extends AbstractCountdown
     /**
      * @var int
      */
-    private $circleWidth = 100;
-
-    /**
-     * @var int
-     */
-    private $circleHeight = 100;
-
-    /**
-     * @var float
-     */
-    private $circleScale = 3.0;
+    private $circleDiameter = 100;
 
     /**
      * Cache the circle image so don't have to draw it again
@@ -62,11 +52,11 @@ class CircleCountdown extends AbstractCountdown
     protected function getFormImage($days, $hours, $minutes, $seconds)
     {
         if (empty($this->circleImage)) {
-            $circleImageWidth = $this->width * $this->circleScale;
-            $circleImageHeight = $this->height * $this->circleScale;
+            $formImageWidth = $this->width * $this->scale;
+            $formImageHeight = $this->height * $this->scale;
 
             // create the circle image once
-            $this->circleImage = imagecreatetruecolor($circleImageWidth, $circleImageHeight);
+            $this->circleImage = imagecreatetruecolor($formImageWidth, $formImageHeight);
 
             // background
             $backgroundColor = imagecolorallocate(
@@ -78,11 +68,11 @@ class CircleCountdown extends AbstractCountdown
             imagefilledrectangle(
                 $this->circleImage,
                 0, 0,
-                $circleImageWidth, $circleImageHeight,
+                $formImageWidth, $formImageHeight,
                 $backgroundColor
             );
 
-            imagesetthickness($this->circleImage, $this->circleScale * 2);
+            imagesetthickness($this->circleImage, $this->scale * 2);
 
             $this->circleBackgroundColorAll = imagecolorallocate(
                 $this->circleImage,
@@ -98,20 +88,21 @@ class CircleCountdown extends AbstractCountdown
             );
         }
 
-        $zoomWidth = $this->circleWidth * $this->circleScale;
-        $zoomHeight = $this->circleHeight * $this->circleScale;
+        $circleDiameter = $this->circleDiameter * $this->scale;
+        $circlePadding = 20 * $this->scale;
+        $distanceBetweenItems = $this->circleDiameter * $this->scale;
 
         imagearc(
             $this->circleImage,
-            ($zoomWidth / 2) + 900, $zoomHeight / 2,
-            $zoomWidth - 20 * $this->circleScale,$zoomHeight - 20 * $this->circleScale,
+            ($circleDiameter / 2) + (3 * $distanceBetweenItems), $circleDiameter / 2,
+            $circleDiameter - $circlePadding,$circleDiameter - $circlePadding,
             0, 359.99,
             $this->circleBackgroundColorAll
         );
         imagearc(
             $this->circleImage,
-            ($zoomWidth / 2) + 900, $zoomHeight / 2,
-            $zoomWidth - 20 * $this->circleScale,$zoomHeight - 20 * $this->circleScale,
+            ($circleDiameter / 2) + (3 * $distanceBetweenItems), $circleDiameter / 2,
+            $circleDiameter - $circlePadding,$circleDiameter - $circlePadding,
             -90, -90 - (6 * $seconds),
             $this->circleForegroundColorAll
         );
@@ -119,15 +110,15 @@ class CircleCountdown extends AbstractCountdown
         if (empty($this->lastMinutes) || $minutes != $this->lastMinutes) {
             imagearc(
                 $this->circleImage,
-                ($zoomWidth / 2) + 600, $zoomHeight / 2,
-                $zoomWidth - 20 * $this->circleScale, $zoomHeight - 20 * $this->circleScale,
+                ($circleDiameter / 2) + (2 * $distanceBetweenItems), $circleDiameter / 2,
+                $circleDiameter - $circlePadding, $circleDiameter - $circlePadding,
                 0, 359.99,
                 $this->circleBackgroundColorAll
             );
             imagearc(
                 $this->circleImage,
-                ($zoomWidth / 2) + 600, $zoomHeight / 2,
-                $zoomWidth - 20 * $this->circleScale, $zoomHeight - 20 * $this->circleScale,
+                ($circleDiameter / 2) + (2 * $distanceBetweenItems), $circleDiameter / 2,
+                $circleDiameter - $circlePadding, $circleDiameter - $circlePadding,
                 -90, -90 - (6 * $minutes),
                 $this->circleForegroundColorAll
             );
@@ -137,15 +128,15 @@ class CircleCountdown extends AbstractCountdown
         if (empty($this->lastHours) || $hours != $this->lastHours) {
             imagearc(
                 $this->circleImage,
-                $zoomWidth / 2 + 300, $zoomHeight / 2,
-                $zoomWidth - 20 * $this->circleScale, $zoomHeight - 20 * $this->circleScale,
+                $circleDiameter / 2 + ($distanceBetweenItems), $circleDiameter / 2,
+                $circleDiameter - $circlePadding, $circleDiameter - $circlePadding,
                 0, 359.99,
                 $this->circleBackgroundColorAll
             );
             imagearc(
                 $this->circleImage,
-                $zoomWidth / 2 + 300, $zoomHeight / 2,
-                $zoomWidth - 20 * $this->circleScale,$zoomHeight - 20 * $this->circleScale,
+                $circleDiameter / 2 + ($distanceBetweenItems), $circleDiameter / 2,
+                $circleDiameter - $circlePadding,$circleDiameter - $circlePadding,
                 -90, -90 - (15 * $hours),
                 $this->circleForegroundColorAll
             );
@@ -155,15 +146,15 @@ class CircleCountdown extends AbstractCountdown
         if (empty($this->lastDays) || $days != $this->lastDays) {
             imagearc(
                 $this->circleImage,
-                $zoomWidth / 2, $zoomHeight / 2,
-                $zoomWidth - 20 * $this->circleScale,$zoomHeight - 20 * $this->circleScale,
+                $circleDiameter / 2, $circleDiameter / 2,
+                $circleDiameter - $circlePadding,$circleDiameter - $circlePadding,
                 0, 359.99,
                 $this->circleBackgroundColorAll
             );
             imagearc(
                 $this->circleImage,
-                $zoomWidth / 2, $zoomHeight / 2,
-                $zoomWidth - 20 * $this->circleScale,$zoomHeight - 20 * $this->circleScale,
+                $circleDiameter / 2, $circleDiameter / 2,
+                $circleDiameter - $circlePadding,$circleDiameter - $circlePadding,
                 -90, -90 - (1 * $days),
                 $this->circleForegroundColorAll
             );
@@ -188,8 +179,8 @@ class CircleCountdown extends AbstractCountdown
             $frame, $circleImage,
             0, 0,
             0, 0,
-            $this->width, $this->height,
-            $this->width * $this->circleScale, $this->height * $this->circleScale
+            $this->width * $this->scale, $this->height * $this->scale,
+            $this->width * $this->scale, $this->height * $this->scale
         );
 
         return $frame;
