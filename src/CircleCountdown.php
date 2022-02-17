@@ -41,6 +41,22 @@ class CircleCountdown extends AbstractCountdown
     private $circleForegroundColorAll = null;
 
     /**
+     * @var int
+     */
+    private $lineThickness = 2;
+
+    /**
+     * @param int $lineThickness
+     * @return $this
+     */
+    public function setLineThickness($lineThickness)
+    {
+        $this->lineThickness = $lineThickness;
+
+        return $this;
+    }
+
+    /**
      * Get the circle image for the fake countdown
      *
      * @param int $days
@@ -72,7 +88,7 @@ class CircleCountdown extends AbstractCountdown
                 $backgroundColor
             );
 
-            imagesetthickness($this->circleImage, $this->scale * 2);
+            imagesetthickness($this->circleImage, $this->scale * $this->lineThickness);
 
             $this->circleBackgroundColorAll = imagecolorallocate(
                 $this->circleImage,
