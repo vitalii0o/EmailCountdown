@@ -46,12 +46,24 @@ class FillableSquareCountdown extends AbstractCountdown
             $this->formImage = imagecreatetruecolor($formImageWidth, $formImageHeight);
 
             // background
-            $backgroundColor = imagecolorallocate(
-                $this->formImage,
-                $this->backgroundColor['red'],
-                $this->backgroundColor['green'],
-                $this->backgroundColor['blue']
-            );
+            if ($this->backgroundType === self::BACKGROUND_TYPE_TRANSPARENT) {
+                $backgroundColor = imagecolorallocatealpha(
+                    $this->formImage,
+                    $this->backgroundColor['red'],
+                    $this->backgroundColor['green'],
+                    $this->backgroundColor['blue'],
+                    127
+                );
+                imagealphablending($this->formImage, false);
+                imagesavealpha($this->formImage, true);
+            } else {
+                $backgroundColor = imagecolorallocate(
+                    $this->formImage,
+                    $this->backgroundColor['red'],
+                    $this->backgroundColor['green'],
+                    $this->backgroundColor['blue']
+                );
+            }
             imagefilledrectangle(
                 $this->formImage,
                 0, 0,

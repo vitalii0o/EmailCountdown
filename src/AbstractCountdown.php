@@ -4,6 +4,14 @@ namespace EmailCountdown;
 
 abstract class AbstractCountdown
 {
+    const BACKGROUND_TYPE_DEFAULT = 'default';
+    const BACKGROUND_TYPE_TRANSPARENT = 'transparent';
+
+    /**
+     * @var string
+     */
+    protected $backgroundType = self::BACKGROUND_TYPE_DEFAULT;
+
     /**
      * @var int
      */
@@ -291,7 +299,25 @@ abstract class AbstractCountdown
         $frame = imagecreatetruecolor($this->width * $this->scale, $this->height * $this->scale);
 
         // background color again
-        $backgroundColor = imagecolorallocate($frame, $this->backgroundColor['red'], $this->backgroundColor['green'], $this->backgroundColor['blue']);
+        if ($this->backgroundType === self::BACKGROUND_TYPE_TRANSPARENT) {
+            $backgroundColor = imagecolorallocatealpha(
+                $frame,
+                $this->backgroundColor['red'],
+                $this->backgroundColor['green'],
+                $this->backgroundColor['blue'],
+                127
+            );
+            imagealphablending($frame, false);
+            imagesavealpha($frame, true);
+        } else {
+            $backgroundColor = imagecolorallocate(
+                $frame,
+                $this->backgroundColor['red'],
+                $this->backgroundColor['green'],
+                $this->backgroundColor['blue']
+            );
+        }
+
         imagefilledrectangle(
             $frame,
             0, 0,
@@ -541,6 +567,16 @@ abstract class AbstractCountdown
             $this->textLabelColor = self::convertHexToRGB($textLabelColor);
         }
 
+        return $this;
+    }
+
+    /**
+     * @param string $backgroundType
+     * @return $this
+     */
+    public function setBackgroundType(string $backgroundType)
+    {
+        $this->backgroundType = $backgroundType;
         return $this;
     }
 }

@@ -75,12 +75,25 @@ class CircleCountdown extends AbstractCountdown
             $this->circleImage = imagecreatetruecolor($formImageWidth, $formImageHeight);
 
             // background
-            $backgroundColor = imagecolorallocate(
-                $this->circleImage,
-                $this->backgroundColor['red'],
-                $this->backgroundColor['green'],
-                $this->backgroundColor['blue']
-            );
+            if ($this->backgroundType === self::BACKGROUND_TYPE_TRANSPARENT) {
+                $backgroundColor = imagecolorallocatealpha(
+                    $this->circleImage,
+                    $this->backgroundColor['red'],
+                    $this->backgroundColor['green'],
+                    $this->backgroundColor['blue'],
+                    127
+                );
+                imagealphablending($this->circleImage, false);
+                imagesavealpha($this->circleImage, true);
+            } else {
+                $backgroundColor = imagecolorallocate(
+                    $this->circleImage,
+                    $this->backgroundColor['red'],
+                    $this->backgroundColor['green'],
+                    $this->backgroundColor['blue']
+                );
+            }
+
             imagefilledrectangle(
                 $this->circleImage,
                 0, 0,
